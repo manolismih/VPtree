@@ -9,8 +9,8 @@ struct vptree
     double *vp; //the vantage point
     double md;  //the median distance of the vantage point to the others
     int idx;    //the index of the vantage point in the original set
-    vptree inner;
-    vptree outer;
+    vptree *inner;
+    vptree *outer;
 };
 
 // ========== LIST OF ACCESSORS
