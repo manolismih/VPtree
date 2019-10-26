@@ -4,7 +4,28 @@
 #include <stdlib.h>
 #include <math.h>
 
-double qselect(double *array, int k);
+//! Returns the k'th smallest element in dataset X
+/*!
+    \param array    the given dataset of elements, in a random order
+    \param k        the k'th smallest element 
+    \param left     index from which searching of requested elem. starts
+    \param right    idex from which searching of requested element ends
+
+    \return         The value of k'th smallest element from indices [left ... right]
+*/
+double qselect(double *array, int left, int right, int k);
+
+//! Groups the array (ranging from indices left to right)
+//! into two parts: those less than pivot
+//! and thos greater or equal to pivot
+/*!
+    \param array        the given dataset of elements, in a random order
+    \param left         index from which the partitioning starts
+    \param right        index from which the partitioning ends
+    \param pivotIndex   pivot's index in the array
+    \return             The value of k'th smallest element
+*/
+int partition(double *array, int left, int right, int pivotIndex);
 
 vptree *vpt(double *X, int n, int d, int *idx)
 {
@@ -136,4 +157,46 @@ double *getVP(vptree *T)
 
 int getIDX(vptree *T)
 {
+}
+
+double qselect(double *array, int left, int right, int k)
+{
+    if (left == right)
+    {
+        return array[left];
+    }
+    //! Assume that pivot is always on the right
+    int pivotPos = partition(array, left, right, right);
+
+    if (pivotPos - left == k - 1)
+        return array[pivotPos];
+    else if (pivotPos - left > k - 1)
+        return qselect(array, left, pivotPos - 1, k);
+    else
+        return qselect(array, pivotPos + 1, right, k - (pivotPos - left + 1));
+};
+void swap(double *x, double *y)
+{
+    double temp = *x;
+    *x = *y;
+    *y = temp;
+    return;
+};
+
+int partition(double *array, int left, int right, int pivotIndex)
+{
+    double pivot = array[pivotIndex];
+    swap(&array[pivotIndex], &array[right]); //move pitov to end
+    int storeIndex = left;
+    int i;
+    for (i = left; i <= right - 1; i++)
+    {
+        if (array[i] < pivot)
+        {
+            swap(&array[storeIndex], &array[i]);
+            storeIndex++;
+        }
+    }
+    swap(&array[right], &array[storeIndex]);
+    return storeIndex;
 }
