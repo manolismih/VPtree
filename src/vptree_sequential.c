@@ -59,6 +59,15 @@ vptree *vpt(double *X, int n, int d, int *idx)
         }
 
         //find the median distance with quickselect
+
+        /*
+
+
+                MAKE A COPY OF distances[] FIRST AND 
+                THEN USE qselect()
+
+
+        */
         medianDistance = qselect(distances, n / 2);
         T->md = medianDistance;
 
