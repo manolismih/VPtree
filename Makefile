@@ -16,36 +16,32 @@
 SHELL := /bin/bash
 
 #define the C compiler to use
-CC = gcc-7
+CC = gcc
 
 #define compile-time flags
-CFLAGS = -Wall -fcilkplus -fopenmp -03
+CFLAGS = -Wall -O3
 
 #define directories containing header files
-INCLUDES = -I./inc
+INCLUDES = -I ./inc
 
-#define the source file for the library
-SRC = vptree
+########################################################################
 
-#define the different executables
-VERSIONS = sequential pthreads openmp Cilk
-
-#define the executable file name
-MAIN = main
-
-#call everytime
-all: $(addprefix $(MAIN)_, $(TYPES))
-
-lib: $(addsuffix .a, $(addprefix $(SRC)_, $(TYPES)))
-
-$(MAIN)_%: $(MAIN).c $(SRC)_%.a
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^
-
-.o.a:
-	ar rcs $@ $<
-
-.c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
-
-clean:
-	$(RM) *.o *~ $(addprefix $(MAIN)_, $(TYPES)) fib_*.a
+lib: vptree_cilk.o vptree_openmp.o vptree_pthreads.o vptree_sequential.o
+	ar rcs lib/vptree_cilk.a lib/vptree_cilk.o
+	ar rcs lib/vptree_openmp.a lib/vptree_openmp.o
+	ar rcs lib/vptree_pthreads.a lib/vptree_pthreads.o
+	ar rcs lib/vptree_sequential.a lib/vptree_sequential.o lib/details.o
+	rm lib/vptree_cilk.o lib/vptree_sequential.o lib/vptree_openmp.o lib/vptree_pthreads.o lib/details.o
+	
+vptree_cilk.o : src/vptree_cilk.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/vptree_cilk.c -o lib/vptree_cilk.o
+	
+vptree_sequential.o : src/vptree_sequential.c src/details.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/vptree_sequential.c -o lib/vptree_sequential.o
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/details.c -o lib/details.o
+	
+vptree_pthreads.o : src/vptree_pthreads.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/vptree_pthreads.c -o lib/vptree_pthreads.o
+	
+vptree_openmp.o : src/vptree_openmp.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/vptree_openmp.c -o lib/vptree_openmp.o
