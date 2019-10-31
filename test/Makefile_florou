@@ -5,25 +5,29 @@ SHELL := /bin/bash
 CC = gcc
 
 test_sequential:
-	cd ..; make lib; 
-	cp ../lib/*.a ../inc/vptree.h ./;
+	tar -xvzf code.tar.gz
+	cd vptree; make lib; cd ..
+	cd vptree; cp lib/*.a inc/vptree.h ../; cd ..
 	$(CC) tester.c vptree_sequential.a -o $@ -lm
 	./test_sequential
 
 test_pthreads:
-	cd ..; make lib;
-	cp ../lib/*.a ../inc/vptree.h ./;
+	tar -xvzf code.tar.gz
+	cd vptree; make lib; cd ..
+	cd vptree; cp lib/*.a inc/vptree.h ../; cd ..
 	$(CC) tester.c vptree_pthreads.a -o $@ -lm
 	./test_pthreads
 
 test_openmp:
-	cd ..; make lib;
-	cp ../lib/*.a ../inc/vptree.h ./;
+	tar -xvzf code.tar.gz
+	cd vptree; make lib; cd ..
+	cd vptree; cp lib/*.a inc/vptree.h ../; cd ..
 	$(CC) tester.c vptree_openmp.a -o $@ -lm
 	./test_openmp
 
 test_cilk:
-	cd ../; make lib;
-	cp ../lib/*.a ../inc/vptree.h ../;
+	tar -xvzf code.tar.gz
+	cd vptree; make lib; cd ..
+	cd vptree; cp lib/*.a inc/vptree.h ../; cd ..
 	$(CC) tester.c vptree_cilk.a -o $@ -lm
 	./test_cilk
