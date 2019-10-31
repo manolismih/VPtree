@@ -32,7 +32,7 @@ vptree *buildvp(double *X, int n, int d);
     \param node A vantage-point tree
     \return The vantage-point subtree
 */
-inline vptree *getInner(vptree *T) {return T->inner;}
+vptree * getInner(vptree * T);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ inline vptree *getInner(vptree *T) {return T->inner;}
     \param node A vantage-point tree
     \return The vantage point subtree
 */
-inline vptree *getOuter(vptree * T) {return T->outer;}
+vptree * getOuter(vptree * T);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -50,7 +50,8 @@ inline vptree *getOuter(vptree * T) {return T->outer;}
     \param node A vantage-point tree
     \return The median distance
 */
-double getMD(vptree *T) {return T->md;}
+double getMD(vptree * T);
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -59,7 +60,7 @@ double getMD(vptree *T) {return T->md;}
     \param node A vantage-point tree
     \return The coordinates [d-dimensional vector]
 */
-double *getVP(vptree *T) {return T->vp;}
+double * getVP(vptree * T);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -68,7 +69,8 @@ double *getVP(vptree *T) {return T->vp;}
     \param node A vantage-point tree
     \return The index to the input vector of data points
 */
-int getIDX(vptree *T) {return T->idx;}
+int getIDX(vptree * T);
+
 
 /////////////////////////////////////////////////////////////////////////////
 
