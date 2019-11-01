@@ -26,6 +26,11 @@ INCLUDES = -I ./inc
 
 ########################################################################
 
+test_manos: test_manos.c lib
+	$(CC) $(CFLAGS) $(INCLUDES) test_manos.c lib/vptree_sequential.a -o test_manos -lm
+	./test_manos
+	rm test_manos
+
 lib: vptree_cilk.o vptree_openmp.o vptree_pthreads.o vptree_sequential.o
 	ar rcs lib/vptree_cilk.a lib/vptree_cilk.o
 	ar rcs lib/vptree_openmp.a lib/vptree_openmp.o
