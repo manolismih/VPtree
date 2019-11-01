@@ -14,7 +14,7 @@ test_sequential:
 test_pthreads:
 	cd ..; make lib;
 	cp ../lib/*.a ../inc/vptree.h ./;
-	$(CC) tester.c vptree_pthreads.a -o $@ -lm
+	$(CC) -pthread tester.c vptree_pthreads.a -o $@ -lm
 	./test_pthreads
 	rm test_pthreads *.a *.h ../lib/*.a
 
