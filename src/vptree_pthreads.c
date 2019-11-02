@@ -118,8 +118,11 @@ void recursiveBuildTree(vptree *node, int start, int end)
         node->outer = NULL;
 
     //wait for thread to join
-    if (doThreading)
+    if (doThreading) 
+    {
         pthread_join(threadInner, NULL);
+        updateThreadCounter(-1);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -148,10 +151,9 @@ vptree *buildvp(double *X, int n, int d)
 
 ////////////////////////////////////////////////////////////////////////
 
-void *threadRecBuildTree(void *arguments)
+void *threadRecBuildTree(void* arguments)
 {
-    threadArgs *args = (threadArgs *)arguments;
-
+    threadArgs *args = (threadArgs*)arguments;
     recursiveBuildTree(args->node, args->start, args->end);
     pthread_exit((void *)0);
     return (void *)0;
@@ -159,12 +161,12 @@ void *threadRecBuildTree(void *arguments)
 
 ////////////////////////////////////////////////////////////////////////
 
-void *threadDistCalc(void *arguments)
+void *threadDistCalc(void* arguments)
 {
-    threadArgs *args = (threadArgs *)arguments;
+    threadArgs* args = (threadArgs*)arguments;
     distCalc(args->node->vp, args->start, args->end);
-    pthread_exit((void *)0);
-    return (void *)0;
+    pthread_exit((void*)0);
+    return (void*)0;
 }
 
 ///////////////////////////////////////////////////////////
