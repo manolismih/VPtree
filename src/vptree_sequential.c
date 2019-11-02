@@ -3,7 +3,6 @@
 #include "details.h"
 #include <stdlib.h>
 #include <math.h>
-#include <stdio.h>
 
 void recursiveBuildTree(
     vptree* node, 

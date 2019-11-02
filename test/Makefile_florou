@@ -22,7 +22,7 @@ test_openmp:
 	tar -xvzf code.tar.gz
 	cd vptree; make lib; cd ..
 	cd vptree; cp lib/*.a inc/vptree.h ../; cd ..
-	$(CC) tester.c vptree_openmp.a -o $@ -lm
+	$(CC) -fopenmp tester.c vptree_openmp.a -o $@ -lm
 	./test_openmp
 
 test_cilk:
