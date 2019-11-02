@@ -21,7 +21,7 @@ test_pthreads:
 test_openmp:
 	cd ..; make lib;
 	cp ../lib/*.a ../inc/vptree.h ./;
-	$(CC) tester.c vptree_openmp.a -o $@ -lm
+	$(CC) -fopenmp tester.c vptree_openmp.a -o $@ -lm
 	./test_openmp
 	rm test_openmp *.a *.h ../lib/*.a
 
