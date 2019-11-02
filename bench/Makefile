@@ -14,7 +14,7 @@ INCLUDES =-I../inc
 benchmark_sequential: benchmark.c bench_util.o
 	cd ..; make lib; 
 	cp ../lib/*.a ../inc/vptree.h ./;
-	$(CC) benchmark.c bench_util.o vptree_sequential.a -o $@ -lm
+	$(CC) $(CFLAGS) benchmark.c bench_util.o vptree_sequential.a -o $@ -lm
 	
 benchmark_pthreads: benchmark.c bench_util.o
 	cd ..; make lib; 
@@ -24,7 +24,7 @@ benchmark_pthreads: benchmark.c bench_util.o
 benchmark_openmp: benchmark.c bench_util.o
 	cd ..; make lib; 
 	cp ../lib/*.a ../inc/vptree.h ./;
-	$(CC) benchmark.c bench_util.o vptree_sequential.a -o $@ -lm
+	$(CC) $(CFLAGS) benchmark.c bench_util.o vptree_sequential.a -o $@ -lm
 	
 bench_util.o: bench_util.c	
 	$(CC) $(CFLAGS) $(INCLUDES) -c bench_util.c 

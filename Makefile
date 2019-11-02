@@ -28,7 +28,7 @@ INCLUDES = -I ./inc
 ########################################################################
 
 lib: vptree_cilk.o vptree_openmp.o vptree_pthreads.o vptree_sequential.o
-	ar rcs lib/vptree_cilk.a lib/vptree_cilk.o
+	ar rcs lib/vptree_cilk.a lib/vptree_cilk.o lib/details.o
 	ar rcs lib/vptree_pthreads.a lib/vptree_pthreads.o lib/details.o
 	ar rcs lib/vptree_openmp.a lib/vptree_openmp.o lib/details.o
 	ar rcs lib/vptree_sequential.a lib/vptree_sequential.o lib/details.o
