@@ -11,6 +11,10 @@ CFLAGS = -Wall -O3 -pthread -fopenmp  -fcilkplus
 INCLUDES =-I../inc
 ######################################
 
+all: benchmark_cilk benchmark_openmp benchmark_pthreads benchmark_sequential
+	find ../ -name "*.a" -delete
+	find ../ -name "*.o" -delete
+
 benchmark_sequential: benchmark.c bench_util.o
 	cd ..; make lib; 
 	cp ../lib/*.a ../inc/vptree.h ./;

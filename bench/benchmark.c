@@ -4,7 +4,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define NUM_OF_TESTS 15
+#define NUM_OF_TESTS 5
 
 int main(int argc, char *argv[])
 {
