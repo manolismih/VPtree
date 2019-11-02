@@ -5,8 +5,10 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
+#include <stdio.h>
 
-#define ELEMS_PER_THREAD 3
+#define MAX_THREADS 10
 
 void distCalc(
     vptree *node,
@@ -31,7 +33,8 @@ void recursiveBuildTree(
     double distArr[n],
     double dataArr[n][d])
 {
-    int numOfThreads;
+    int range;
+    int availableThreads;
     int threadStart;
     int threadEnd;
 
@@ -48,15 +51,17 @@ void recursiveBuildTree(
 
     end--; //end is the vantage point, we're not dealing with it again
 
-    numOfThreads = (end - start + 1) / ELEMS_PER_THREAD;
-    if (numOfThreads > 1)
+    availableThreads = MAX_THREADS - __cilkrts_get_nworkers();
+    printf("Available threads %d    Active Threads %d\n", availableThreads, __cilkrts_get_total_workers());
+    if (availableThreads > 1)
     {
-        for (int i = 0; i < numOfThreads; i++)
+        range = (end - start + 1) / (availableThreads);
+        for (int i = 0; i < availableThreads; i++)
         {
-            threadStart = start + i * ELEMS_PER_THREAD;
-            threadEnd = start + (i + 1) * ELEMS_PER_THREAD - 1;
+            threadStart = start + i * range;
+            threadEnd = start + (i + 1) * range - 1;
 
-            if (threadEnd + ELEMS_PER_THREAD > end)
+            if (threadEnd + range > end)
                 threadEnd = end;
 
             cilk_spawn distCalc(node, threadStart, threadEnd, n, d, idArr, distArr, dataArr);
@@ -74,7 +79,12 @@ void recursiveBuildTree(
     node->inner = malloc(sizeof(vptree));
     node->outer = malloc(sizeof(vptree));
 
-    cilk_spawn recursiveBuildTree(node->inner, start, (start + end) / 2, n, d, idArr, distArr, dataArr);
+    availableThreads = MAX_THREADS - __cilkrts_get_nworkers();
+
+    if (availableThreads > 1)
+        cilk_spawn recursiveBuildTree(node->inner, start, (start + end) / 2, n, d, idArr, distArr, dataArr);
+    else
+        recursiveBuildTree(node->inner, start, (start + end) / 2, n, d, idArr, distArr, dataArr);
 
     if (end > start)
         recursiveBuildTree(node->outer, (start + end) / 2 + 1, end, n, d, idArr, distArr, dataArr);
@@ -91,9 +101,15 @@ vptree *buildvp(double *X, int n, int d)
     vptree *root = malloc(sizeof(vptree));
     int *idArr = malloc(n * sizeof(int));
     double *distArr = malloc(n * sizeof(double));
+    char numOfThreadsStr[10];
 
     for (int i = 0; i < n; i++)
         idArr[i] = i;
+
+    sprintf(numOfThreadsStr, "%d", MAX_THREADS);
+
+    __cilkrts_set_param("nworkers", numOfThreadsStr);
+
     recursiveBuildTree(root, 0, n - 1, n, d, idArr, distArr, (double(*)[d])X);
 
     free(idArr);
