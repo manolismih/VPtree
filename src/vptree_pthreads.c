@@ -5,7 +5,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define ELEMS_PER_THREAD 50
+#define ELEMS_PER_THREAD 16
 
 //Globally defined variables for easy data access by threads
 int *idArr;
@@ -17,35 +17,34 @@ int N, D;  //data dimensions
 typedef struct threadArgs
 {
     int threadId;
-    vptree *node;
+    vptree* node;
     int start, end;
 } threadArgs;
 
-void *threadRecBuildTree(void *arguments);
-void *threadDistCalc(void *arguments);
+void *threadRecBuildTree(void* arguments);
+void *threadDistCalc(void* arguments);
 
-void distCalc(vptree *node, int start, int end)
+////////////////////////////////////////////////////////////////////////
+
+void distCalc(vptree* node, int start, int end)
 {
-    double(*dataArr)[D] = (double(*)[D])Y; //weird type cast in C, MAGIC!
+    double(*dataArr)[D] = (double(*)[D])Y;
     for (int i = start; i <= end; i++)
-        distArr[i] = sqr(node->vp[0] - dataArr[idArr[i]][0]); //dataArr[idArr[i]][0]
+        distArr[i] = sqr(node->vp[0] - dataArr[idArr[i]][0]);
     for (int i = start; i <= end; i++)
         for (int j = 1; j < D; j++)
-            distArr[i] += sqr(node->vp[j] - dataArr[idArr[i]][j]); //dataArr[idArr[i]][j]
+            distArr[i] += sqr(node->vp[j] - dataArr[idArr[i]][j]);
 };
 
-void recursiveBuildTree(
-    vptree *node,
-    int start, int end,
-    int n, int d,
-    int idArr[n],
-    double distArr[n],
-    double dataArr[n][d])
+////////////////////////////////////////////////////////////////////////
+
+void recursiveBuildTree(vptree* node, int start, int end)
 {
+    double (*dataArr)[D] = (double(*)[D])Y;
     pthread_t threadInner;
     threadArgs innerArgs;
-    pthread_t *threadDist; //array of threads for distArr calculation
-    threadArgs *distArgs;  //we need an array of different args, each one for each thread
+    pthread_t *threadDist = NULL; //array of threads for distArr calculation
+    threadArgs *distArgs = NULL; //we need an array of different args, each one for each thread
     int numOfThreads;
 
     //consider X[ idArr[end] ] as vantage point
@@ -65,7 +64,7 @@ void recursiveBuildTree(
     if (numOfThreads > 1)
     {
         threadDist = malloc(numOfThreads * sizeof(pthread_t));
-        distArgs = malloc(numOfThreads * sizeof(distArgs));
+        distArgs = malloc(numOfThreads * sizeof(threadArgs));
 
         for (int i = 0; i < numOfThreads; i++)
         {
@@ -91,25 +90,28 @@ void recursiveBuildTree(
     // now idArr[start .. (start+end)/2] contains the indexes
     // for the points which belong inside the radius (inner)
 
-    node->md = sqrt(distArr[(start + end) / 2]);
+    node->md = sqrt(distArr[ (start+end)/2 ] );
     node->inner = malloc(sizeof(vptree));
     node->outer = malloc(sizeof(vptree));
 
     //create the arguments to pass
     innerArgs.node = node->inner;
-    innerArgs.end = (start + end) / 2;
+    innerArgs.end = (start+end)/2;
     innerArgs.start = start;
 
+    //~ recursiveBuildTree(node->inner,start,(start+end)/2);
     pthread_create(&threadInner, NULL, threadRecBuildTree, (void *)&innerArgs); //build inner tree in parallel
 
     if (end > start)
-        recursiveBuildTree(node->outer, (start + end) / 2 + 1, end, n, d, idArr, distArr, dataArr);
+        recursiveBuildTree(node->outer, (start+end)/2 +1, end);
     else
         node->outer = NULL;
 
     //wait for thread to join
     pthread_join(threadInner, NULL);
 }
+
+////////////////////////////////////////////////////////////////////////
 
 vptree *buildvp(double *X, int n, int d)
 {
@@ -119,26 +121,29 @@ vptree *buildvp(double *X, int n, int d)
     Y = X;
     N = n;
     D = d;
-
-    for (int i = 0; i < n; i++)
-        idArr[i] = i;
-
-    recursiveBuildTree(root, 0, n - 1, n, d, idArr, distArr, (double(*)[d])X);
+    
+    for (int i=0; i<N; i++) idArr[i] = i;
+    
+    recursiveBuildTree(root, 0, n-1);
 
     free(idArr);
     free(distArr);
     return root;
 }
 
+////////////////////////////////////////////////////////////////////////
+
 void *threadRecBuildTree(void *arguments)
 {
     threadArgs *args = (threadArgs *)arguments;
 
-    recursiveBuildTree(args->node, args->start,
-                       args->end, N, D, idArr, distArr, (double(*)[D])Y);
+    recursiveBuildTree(args->node, args->start, args->end);
     pthread_exit((void *)0);
     return (void *)0;
 }
+
+////////////////////////////////////////////////////////////////////////
+
 void *threadDistCalc(void *arguments)
 {
     threadArgs *args = (threadArgs *)arguments;

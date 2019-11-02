@@ -45,7 +45,7 @@ void recursiveBuildTree(
 
 /////////////////////////////////////////////////////////////////////////////
 
-vptree *buildvp(double *X, int n, int d)
+vptree* buildvp(double* X, int n, int d)
 {    
     vptree *root = malloc( sizeof(vptree) );
     int *idArr = malloc( n*sizeof(int) );
