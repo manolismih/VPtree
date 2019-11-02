@@ -140,7 +140,7 @@ vptree *buildvp(double *X, int n, int d)
 
     recursiveBuildTree(root, 0, n - 1);
 
-    pthread_mutexattr_destroy(&mutexCounter);
+    pthread_mutex_destroy(&mutexCounter);
     free(idArr);
     free(distArr);
     return root;
