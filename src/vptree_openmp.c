@@ -1,9 +1,10 @@
-//vptree_openmp.c
 #include "vptree.h"
 #include "details.h"
 #include <stdlib.h>
 #include <math.h>
 #include <omp.h>
+
+#define MIN_INTERVAL_PER_THREAD 10
 
 void recursiveBuildTree(
     vptree* node, 
@@ -25,7 +26,8 @@ void recursiveBuildTree(
     }
     end--; //end is the vantage point, we're not dealing with it again
     
-    #pragma omp parallel for
+    //num_threads()
+    #pragma omp parallel for 
     for (int i=start; i<=end; i++)
         distArr[i] = sqr(node->vp[0] -dataArr[ idArr[i] ][0]);
     #pragma omp parallel for
@@ -41,15 +43,22 @@ void recursiveBuildTree(
     node->inner = malloc( sizeof(vptree) );
     node->outer = malloc( sizeof(vptree) );
     
-    #pragma omp task
-    recursiveBuildTree(node->inner, start, (start+end)/2, n, d, idArr, distArr, dataArr);
-    
-    #pragma omp task
+    int doThreading = (end-start+1)/2 >= MIN_INTERVAL_PER_THREAD ;
+    if (doThreading) //build inner tree in parallel
+    {
+        #pragma omp task
+        recursiveBuildTree(node->inner, start, (start+end)/2, n, d, idArr, distArr, dataArr);
+    }
+    else
+        recursiveBuildTree(node->inner, start, (start+end)/2, n, d, idArr, distArr, dataArr);
+
     if (end>start)
         recursiveBuildTree(node->outer, (start+end)/2 +1, end,n, d, idArr, distArr, dataArr);
     else node->outer = NULL;
     
-    #pragma omp taskwait
+    if (doThreading) {
+        #pragma omp taskwait
+    }
 };
 
 /////////////////////////////////////////////////////////////////////////////
