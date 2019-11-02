@@ -17,11 +17,10 @@
 SHELL := /bin/bash
 
 #define the C compiler to use
-CC = gcc
+CC = gcc-7
 
 #define compile-time flags
-CFLAGS = -Wall -O3 -pthread -fopenmp
-
+CFLAGS = -Wall -O3 -pthread -fopenmp -fcilkplus
 #define directories containing header files
 INCLUDES = -I ./inc
 

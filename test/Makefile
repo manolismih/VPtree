@@ -2,7 +2,7 @@
 SHELL := /bin/bash
 
 # define the C/C++ compiler to use,default here is clang
-CC = gcc
+CC = gcc-7
 
 test_sequential:
 	cd ..; make lib; 
@@ -27,7 +27,7 @@ test_openmp:
 
 test_cilk:
 	cd ../; make lib;
-	cp ../lib/*.a ../inc/vptree.h ../;
-	$(CC) tester.c vptree_cilk.a -o $@ -lm
+	cp ../lib/*.a ../inc/vptree.h ./;
+	$(CC) -fcilkplus tester.c vptree_cilk.a -o $@ -lm
 	./test_cilk
 	rm test_cilk *.a *.h ../lib/*.a
