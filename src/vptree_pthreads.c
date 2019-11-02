@@ -5,7 +5,8 @@
 #include <math.h>
 #include <stdio.h>
 
-#define ELEMS_PER_THREAD 16
+#define ELEMS_PER_THREAD 100
+#define MIN_INTERVAL_PER_THREAD 10
 
 //Globally defined variables for easy data access by threads
 int *idArr;
@@ -60,7 +61,7 @@ void recursiveBuildTree(vptree* node, int start, int end)
 
     end--; //end is the vantage point, we're not dealing with it again
 
-    numOfThreads = (end - start) / ELEMS_PER_THREAD;
+    numOfThreads = (end-start+1) / ELEMS_PER_THREAD;
     if (numOfThreads > 1)
     {
         threadDist = malloc(numOfThreads * sizeof(pthread_t));
@@ -99,16 +100,18 @@ void recursiveBuildTree(vptree* node, int start, int end)
     innerArgs.end = (start+end)/2;
     innerArgs.start = start;
 
-    //~ recursiveBuildTree(node->inner,start,(start+end)/2);
-    pthread_create(&threadInner, NULL, threadRecBuildTree, (void *)&innerArgs); //build inner tree in parallel
-
+    int doThreading = (end-start+1)/2 >= MIN_INTERVAL_PER_THREAD ;
+    if (doThreading) //build inner tree in parallel
+        pthread_create(&threadInner, NULL, threadRecBuildTree, (void *)&innerArgs); 
+    else 
+        recursiveBuildTree(node->inner,start,(start+end)/2);
+        
     if (end > start)
         recursiveBuildTree(node->outer, (start+end)/2 +1, end);
-    else
-        node->outer = NULL;
+    else node->outer = NULL;
 
     //wait for thread to join
-    pthread_join(threadInner, NULL);
+    if (doThreading) pthread_join(threadInner, NULL);
 }
 
 ////////////////////////////////////////////////////////////////////////
