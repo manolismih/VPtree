@@ -7,12 +7,15 @@
 
 #define MAX_THREADS 2
 //global active thread counter
-int activeThreads=1;
+int activeThreads = 1;
+pthread_mutex_t mutexCounter;
 
 inline void updateThreadCounter(int x)
 {
-    !!!!!
-} 
+    pthread_mutex_lock(&mutexCounter);
+    activeThreads += x;
+    pthread_mutex_unlock(&mutexCounter);
+}
 
 //Globally defined variables for easy data access by threads
 int *idArr;
@@ -24,15 +27,15 @@ int N, D;  //data dimensions
 typedef struct threadArgs
 {
     int start, end;
-    vptree* node;
+    vptree *node;
 } threadArgs;
 
-void *threadRecBuildTree(void* arguments);
-void *threadDistCalc(void* arguments);
+void *threadRecBuildTree(void *arguments);
+void *threadDistCalc(void *arguments);
 
 ////////////////////////////////////////////////////////////////////////
 
-void distCalc(double* vp, int start, int end)
+void distCalc(double *vp, int start, int end)
 {
     double(*dataArr)[D] = (double(*)[D])Y;
     for (int i = start; i <= end; i++)
@@ -44,9 +47,9 @@ void distCalc(double* vp, int start, int end)
 
 ////////////////////////////////////////////////////////////////////////
 
-void recursiveBuildTree(vptree* node, int start, int end)
+void recursiveBuildTree(vptree *node, int start, int end)
 {
-    double (*dataArr)[D] = (double(*)[D])Y;
+    double(*dataArr)[D] = (double(*)[D])Y;
     //consider X[ idArr[end] ] as vantage point
     node->idx = idArr[end];
     node->vp = dataArr[node->idx];
@@ -58,28 +61,29 @@ void recursiveBuildTree(vptree* node, int start, int end)
     }
     end--; //end is the vantage point, we're not dealing with it again
 
-    int freeThreads = MAX_THREADS-activeThreads;
-    if (freeThreads<=0) distCalc(node->vp, start, end); //sequential calculation
-    else 
+    int freeThreads = MAX_THREADS - activeThreads;
+    if (freeThreads <= 0)
+        distCalc(node->vp, start, end); //sequential calculation
+    else
     {
         updateThreadCounter(+freeThreads);
-        int workPerThread = (end-start+1) / (freeThreads+1);
+        int workPerThread = (end - start + 1) / (freeThreads + 1);
         //array of thread objects for distArr calculation
         pthread_t threadObj[freeThreads];
         //we need an array of different args, each one for each thread
-        threadArgs Args[freeThreads]; 
-        
-        for (int id=0; id<freeThreads; id++)
+        threadArgs Args[freeThreads];
+
+        for (int id = 0; id < freeThreads; id++)
         {
-            Args[id].start = start +id*workPerThread;
-            Args[id].end   = Args[id].start+workPerThread-1;
-            Args[id].node  = node;
-            pthread_create(threadObj+id, NULL, threadDistCalc, (void *)(Args+id));
+            Args[id].start = start + id * workPerThread;
+            Args[id].end = Args[id].start + workPerThread - 1;
+            Args[id].node = node;
+            pthread_create(threadObj + id, NULL, threadDistCalc, (void *)(Args + id));
         }
         //current thread does it's share + the leftovers till end
-        distCalc(node->vp,start +freeThreads*workPerThread, end);
-        
-        for (int id=0; id<freeThreads; id++)
+        distCalc(node->vp, start + freeThreads * workPerThread, end);
+
+        for (int id = 0; id < freeThreads; id++)
             pthread_join(threadObj[id], NULL);
         updateThreadCounter(-freeThreads);
     }
@@ -88,7 +92,7 @@ void recursiveBuildTree(vptree* node, int start, int end)
     // now idArr[start .. (start+end)/2] contains the indexes
     // for the points which belong inside the radius (inner)
 
-    node->md = sqrt(distArr[ (start+end)/2 ] );
+    node->md = sqrt(distArr[(start + end) / 2]);
     node->inner = malloc(sizeof(vptree));
     node->outer = malloc(sizeof(vptree));
 
@@ -100,19 +104,22 @@ void recursiveBuildTree(vptree* node, int start, int end)
         //create the arguments to pass
         threadArgs innerArgs;
         innerArgs.node = node->inner;
-        innerArgs.end = (start+end)/2;
+        innerArgs.end = (start + end) / 2;
         innerArgs.start = start;
-        
+
         pthread_create(&threadInner, NULL, threadRecBuildTree, (void *)&innerArgs);
-    } 
-    else recursiveBuildTree(node->inner,start,(start+end)/2);
-        
+    }
+    else
+        recursiveBuildTree(node->inner, start, (start + end) / 2);
+
     if (end > start)
-        recursiveBuildTree(node->outer, (start+end)/2 +1, end);
-    else node->outer = NULL;
+        recursiveBuildTree(node->outer, (start + end) / 2 + 1, end);
+    else
+        node->outer = NULL;
 
     //wait for thread to join
-    if (doThreading) pthread_join(threadInner, NULL);
+    if (doThreading)
+        pthread_join(threadInner, NULL);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -125,11 +132,15 @@ vptree *buildvp(double *X, int n, int d)
     Y = X;
     N = n;
     D = d;
-    
-    for (int i=0; i<N; i++) idArr[i] = i;
-    
-    recursiveBuildTree(root, 0, n-1);
 
+    for (int i = 0; i < N; i++)
+        idArr[i] = i;
+
+    pthread_mutex_init(&mutexCounter, NULL);
+
+    recursiveBuildTree(root, 0, n - 1);
+
+    pthread_mutexattr_destroy(&mutexCounter);
     free(idArr);
     free(distArr);
     return root;
@@ -160,6 +171,6 @@ void *threadDistCalc(void *arguments)
 
 vptree *getInner(vptree *T) { return T->inner; }
 vptree *getOuter(vptree *T) { return T->outer; }
-double getMD    (vptree *T) { return T->md; }
-double *getVP   (vptree *T) { return T->vp; }
-int getIDX      (vptree *T) { return T->idx; }
+double getMD(vptree *T) { return T->md; }
+double *getVP(vptree *T) { return T->vp; }
+int getIDX(vptree *T) { return T->idx; }
