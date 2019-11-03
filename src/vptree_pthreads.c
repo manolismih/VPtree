@@ -5,8 +5,8 @@
 #include <math.h>
 #include <stdio.h>
 
-#define MIN_WORK_PER_THREAD 5000000
-#define MAX_THREADS 2
+#define MIN_WORK_PER_THREAD 10000
+#define MAX_THREADS 4
 //global active thread counter
 int activeThreads=1;
 pthread_mutex_t mutexCounter;
