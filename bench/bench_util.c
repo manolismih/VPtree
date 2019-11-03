@@ -51,8 +51,9 @@ void preOrderTraversal(vptree *root)
 {
     if (root != NULL)
     {
-        printf("%d ", root->idx);
+        //~ printf("%d ", root->idx);
         preOrderTraversal(root->inner);
         preOrderTraversal(root->outer);
+        free(root);
     }
 }
