@@ -39,4 +39,6 @@ bench_util.o: bench_util.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c bench_util.c 
 
 clean:
-	rm *.o *.a vptree.h benchmark_*
+	find ../ -name "*.a" -delete
+	find ../ -name "*.o" -delete
+	find ../ -name "benchmark_*" -delete

@@ -23,10 +23,11 @@ int main(int argc, char *argv[])
         sampleGen(N, d, (double(*)[d])X);
 
         start = clock();
-        buildvp(X, N, d);
+        vptree* root = buildvp(X, N, d);
         end = clock();
 
         averageTime += ((double)(end - start)) / CLOCKS_PER_SEC;
+        preOrderTraversal(root); //for cleanup
     }
 
     averageTime = averageTime / NUM_OF_TESTS;
