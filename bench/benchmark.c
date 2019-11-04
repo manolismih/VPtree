@@ -1,7 +1,7 @@
 #include "bench_util.h"
 #include "vptree.h"
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <stdlib.h>
 
 #define NUM_OF_TESTS 5
@@ -16,17 +16,21 @@ int main(int argc, char *argv[])
     int d = atoi(argv[2]);
     double *X = malloc(sizeof(double) * N * d);
     double averageTime = 0;
-    clock_t start, end;
+    struct timeval start, end;
+    long testTimeusec;
 
     for (int i = 0; i < NUM_OF_TESTS; i++)
     {
         sampleGen(N, d, (double(*)[d])X);
 
-        start = clock();
-        vptree* root = buildvp(X, N, d);
-        end = clock();
+        gettimeofday(&start, NULL);
+        vptree *root = buildvp(X, N, d);
+        gettimeofday(&end, NULL);
 
-        averageTime += ((double)(end - start)) / CLOCKS_PER_SEC;
+        testTimeusec = (end.tv_sec - start.tv_sec) * 1000000 
+                    + (end.tv_usec - start.tv_usec);
+        averageTime += ((double)testTimeusec) / 1000000;
+
         preOrderTraversal(root); //for cleanup
     }
 
