@@ -1,0 +1,9 @@
+Input 10000x5 takes 0.007472 seconds on average
+Input 100000x5 takes 0.052897 seconds on average
+Input 10000x50 takes 0.016008 seconds on average
+Input 100000x50 takes 0.146374 seconds on average
+Input 10000x500 takes 0.070474 seconds on average
+Input 100000x500 takes 0.856130 seconds on average
+Input 1000000x5 takes 0.569859 seconds on average
+Input 1000000x50 takes 2.743446 seconds on average
+Input 10000000x5 takes 11.644528 seconds on average
