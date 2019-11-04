@@ -1,12 +1,10 @@
 #include "vptree.h"
-#include "details.h"
 #include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
-#include <stdio.h>
 
 #define MIN_WORK_PER_THREAD 10000
-#define MAX_THREADS 4
+#define MAX_THREADS 2
 //global active thread counter
 int activeThreads=1;
 pthread_mutex_t mutexCounter;
@@ -36,6 +34,7 @@ void *threadDistCalc(void *arguments);
 
 ////////////////////////////////////////////////////////////////////////
 
+inline double sqr(double x) {return x*x;}
 void distCalc(double *vp, int start, int end)
 {
     double(*dataArr)[D] = (double(*)[D])Y;
@@ -45,6 +44,37 @@ void distCalc(double *vp, int start, int end)
         for (int j=1; j<D; j++)
             distArr[i] += sqr(vp[j] - dataArr[idArr[i]][j]);
 };
+
+////////////////////////////////////////////////////////////////////////
+
+inline void swapDouble(double* a, double* b)
+{
+    double temp = *a;
+    *a = *b;
+    *b = temp;
+}
+inline void swapInt(int* a, int* b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+void quickSelect(int kpos, double* distArr, int* idArr, int start, int end)
+{
+    int store=start;
+    double pivot=distArr[end];
+    for (int i=start; i<=end; i++)
+        if (distArr[i] <= pivot)
+        {
+            swapDouble(distArr+i, distArr+store);
+            swapInt   (idArr+i,   idArr+store);
+            store++;
+        }        
+    store--;
+    if (store == kpos) return;
+    else if (store < kpos) quickSelect(kpos, distArr, idArr, store+1, end);
+    else quickSelect(kpos, distArr, idArr, start, store-1);
+}
 
 ////////////////////////////////////////////////////////////////////////
 

@@ -1,5 +1,4 @@
 #include "vptree.h"
-#include "details.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -18,6 +17,7 @@ int N, D;  //data dimensions
 
 ////////////////////////////////////////////////////////////////////////
 
+inline double sqr(double x) {return x*x;}
 void distCalc(double *vp, int start, int end)
 {
     double(*dataArr)[D] = (double(*)[D])Y;
@@ -27,6 +27,37 @@ void distCalc(double *vp, int start, int end)
         for (int j = 1; j < D; j++)
             distArr[i] += sqr(vp[j] - dataArr[idArr[i]][j]);
 };
+
+////////////////////////////////////////////////////////////////////////
+
+inline void swapDouble(double* a, double* b)
+{
+    double temp = *a;
+    *a = *b;
+    *b = temp;
+}
+inline void swapInt(int* a, int* b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+void quickSelect(int kpos, int start, int end)
+{
+    int store=start;
+    double pivot=distArr[end];
+    for (int i=start; i<=end; i++)
+        if (distArr[i] <= pivot)
+        {
+            swapDouble(distArr+i, distArr+store);
+            swapInt   (idArr+i,   idArr+store);
+            store++;
+        }        
+    store--;
+    if (store == kpos) return;
+    else if (store < kpos) quickSelect(kpos, store+1, end);
+    else quickSelect(kpos, start, store-1);
+}
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -63,7 +94,7 @@ void recursiveBuildTree(vptree *node, int start, int end)
         cilk_sync;
     }
 
-    quickSelect((start + end) / 2, distArr, idArr, start, end);
+    quickSelect((start + end) / 2, start, end);
     // now idArr[start .. (start+end)/2] contains the indexes
     // for the points which belong inside the radius (inner)
 
