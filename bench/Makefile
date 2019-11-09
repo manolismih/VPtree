@@ -8,7 +8,7 @@ CC = gcc-7
 CFLAGS = -Wall -O3 -pthread -fopenmp  -fcilkplus
 
 #define directories containing header files
-INCLUDES =-I../inc
+INCLUDES =-I ../inc
 ######################################
 
 all: benchmark_cilk benchmark_openmp benchmark_pthreads benchmark_sequential
