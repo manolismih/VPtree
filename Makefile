@@ -21,26 +21,24 @@ CC = gcc-7
 
 #define compile-time flags
 CFLAGS = -Wall -O3 -pthread -fopenmp -fcilkplus
+
 #define directories containing header files
 INCLUDES = -I ./inc
 
+#define objects
+OBJ = vptree_sequential.o vptree_pthreads.o vptree_cilk.o vptree_openmp.o
+
 ########################################################################
 
-lib: vptree_cilk.o vptree_openmp.o vptree_pthreads.o vptree_sequential.o
+lib: $(OBJ)
 	ar rcs lib/vptree_cilk.a lib/vptree_cilk.o
 	ar rcs lib/vptree_pthreads.a lib/vptree_pthreads.o
 	ar rcs lib/vptree_openmp.a lib/vptree_openmp.o
 	ar rcs lib/vptree_sequential.a lib/vptree_sequential.o
 	rm lib/vptree_cilk.o lib/vptree_sequential.o lib/vptree_openmp.o lib/vptree_pthreads.o
-	
-vptree_cilk.o : src/vptree_cilk.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/vptree_cilk.c -o lib/vptree_cilk.o
-	
-vptree_sequential.o : src/vptree_sequential.c 
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/vptree_sequential.c -o lib/vptree_sequential.o
-	
-vptree_pthreads.o : src/vptree_pthreads.c 
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/vptree_pthreads.c -o lib/vptree_pthreads.o
-	
-vptree_openmp.o : src/vptree_openmp.c 
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/vptree_openmp.c -o lib/vptree_openmp.o
+
+%.o: src/%.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o lib/$@
+
+clean:
+	rm lib/*.a
