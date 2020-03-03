@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
 
-#define MAX_THREADS 2
+long MAX_THREADS;
 #define MIN_THREAD_WORK 8000
 
 //Globally defined variables for easy data access by threads
@@ -125,8 +126,9 @@ vptree *buildvp(double *X, int n, int d)
     Y = X;
     N = n;
     D = d;
-
-    sprintf(maxThreadsStr, "%d", MAX_THREADS);
+    
+    MAX_THREADS = sysconf(_SC_NPROCESSORS_ONLN);
+    sprintf(maxThreadsStr, "%ld", MAX_THREADS);
     __cilkrts_set_param("nworkers", maxThreadsStr);
 
     for (int i = 0; i < N; i++)

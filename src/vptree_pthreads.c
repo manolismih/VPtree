@@ -1,12 +1,13 @@
 #include "vptree.h"
-#include <stdlib.h>
-#include <pthread.h>
 #include <math.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #define MIN_WORK_PER_THREAD 10000
-#define MAX_THREADS 2
 //global active thread counter
-int activeThreads=1;
+long MAX_THREADS;
+int activeThreads = 1;
 pthread_mutex_t mutexCounter;
 
 inline void updateThreadCounter(int x)
@@ -158,6 +159,7 @@ vptree *buildvp(double *X, int n, int d)
     distArr      = malloc( n*sizeof(double) );
     Y=X, N=n, D=d;
     pthread_mutex_init(&mutexCounter, NULL);
+    MAX_THREADS = sysconf(_SC_NPROCESSORS_ONLN);
     for (int i=0; i<N; i++) idArr[i] = i;
 
     recursiveBuildTree(root, 0, n-1);

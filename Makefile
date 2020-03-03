@@ -26,19 +26,19 @@ CFLAGS = -Wall -O3 -pthread -fopenmp -fcilkplus
 INCLUDES = -I ./inc
 
 #define objects
-OBJ = vptree_sequential.o vptree_pthreads.o vptree_cilk.o vptree_openmp.o
+SL = vptree_sequential.a vptree_pthreads.a vptree_cilk.a vptree_openmp.a
 
 ########################################################################
 
-lib: $(OBJ)
-	ar rcs lib/vptree_cilk.a lib/vptree_cilk.o
-	ar rcs lib/vptree_pthreads.a lib/vptree_pthreads.o
-	ar rcs lib/vptree_openmp.a lib/vptree_openmp.o
-	ar rcs lib/vptree_sequential.a lib/vptree_sequential.o
-	rm lib/vptree_cilk.o lib/vptree_sequential.o lib/vptree_openmp.o lib/vptree_pthreads.o
+lib: $(SL)
 
 %.o: src/%.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o lib/$@
 
+%.a: %.o
+	ar rcs lib/$@ lib/$<
+	rm lib/$<
+
 clean:
-	rm lib/*.a
+	find . -name "benchmark_*" -delete
+	find . -name "*.a" -delete
